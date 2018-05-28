@@ -11,6 +11,7 @@ main_page_head = '''
     <!-- Bootstrap 3 -->
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
     <style type="text/css" media="screen">
@@ -32,9 +33,13 @@ main_page_head = '''
             width: 100%;
             height: 100%;
         }
+        .checked {
+            color: orange;
+        }
         .movie-tile {
             margin-bottom: 20px;
             padding-top: 20px;
+            display: block!important;
         }
         .movie-tile:hover {
             background-color: #EEE;
@@ -78,6 +83,34 @@ main_page_head = '''
             $(this).next("div").show("fast", showNext);
           });
         });
+        
+    $(document).ready(function(){
+        $("span").hover(function() {
+            $(this).css('cursor','pointer');
+        }, function() {
+            $(this).css('cursor','auto');
+        });
+    });
+    
+    // Add a star rate to every movie or tv series
+    $(document).ready(function(){    
+      
+        $('span').on('click', function(){
+        var star_number = $(this)[0].getAttribute('rate');
+        var star = $(this).parent().children('span');
+        
+        for (i = 5; i >= star_number; i--) {
+            $(star[i]).removeClass('checked');
+        }
+    
+        for (i = 0; i < star_number; i++) {
+            $(star[i]).addClass('checked');
+        }
+
+        });
+      
+    });
+
     </script>
 </head>
 '''
@@ -105,7 +138,8 @@ main_page_content = '''
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
           <div class="navbar-header">
-            <a class="navbar-brand" href="#">Fresh Tomatoes Movie Trailers</a>
+            <a class="navbar-brand" href="movies.html">Movies</a>
+            <a class="navbar-brand" href="series.html">TV Series</a>
           </div>
         </div>
       </div>
@@ -119,11 +153,22 @@ main_page_content = '''
 
 # A single movie entry html template
 movie_tile_content = '''
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
-    <img src="{poster_image_url}" width="220" height="342">
-    <h2>{movie_title}</h2>
+
+<div class="col-md-6 col-lg-4 text-center" >
+    <div class="movie-tile" width="220" height="342" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
+        <img src="{poster_image_url}" title="{movie_storyline}" width="220" height="342">
+    </div>
+        <h2>{movie_title}</h2>
+        {number_of_seasons}       
+        <span id='0' class="fa fa-star" rate='1'></span>
+        <span id='1' class="fa fa-star" rate='2'></span>
+        <span id='2' class="fa fa-star" rate='3'></span>
+        <span id='3' class="fa fa-star" rate='4'></span>
+        <span id='4' class="fa fa-star" rate='5'></span>
 </div>
+
 '''
+
 
 def create_movie_tiles_content(movies):
     # The HTML content for this section of the page
@@ -133,26 +178,38 @@ def create_movie_tiles_content(movies):
         youtube_id_match = re.search(r'(?<=v=)[^&#]+', movie.trailer_youtube_url)
         youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', movie.trailer_youtube_url)
         trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
+        # Add number of seasons on HTML if is a TV Series
+        try:
+            number_of_seasons = '<h4>Number of seasons: '+movie.number_of_seasons+'</h4>'
+
+        except AttributeError:
+            number_of_seasons = ''
+
 
         # Append the tile for the movie with its content filled in
         content += movie_tile_content.format(
             movie_title=movie.title,
             poster_image_url=movie.poster_image_url,
-            trailer_youtube_id=trailer_youtube_id
+            trailer_youtube_id=trailer_youtube_id,
+            movie_storyline=movie.storyline,
+            number_of_seasons=number_of_seasons
         )
     return content
 
-def open_movies_page(movies):
-  # Create or overwrite the output file
-  output_file = open('fresh_tomatoes.html', 'w')
 
-  # Replace the placeholder for the movie tiles with the actual dynamically generated content
-  rendered_content = main_page_content.format(movie_tiles=create_movie_tiles_content(movies))
+def create_page(movies, output_page_name):
+    # Create or overwrite the output file
+    output_file = open(output_page_name, 'w')
 
-  # Output the file
-  output_file.write(main_page_head + rendered_content)
-  output_file.close()
+    # Replace the placeholder for the movie tiles with the actual dynamically generated content
+    rendered_content = main_page_content.format(movie_tiles=create_movie_tiles_content(movies))
 
-  # open the output file in the browser
-  url = os.path.abspath(output_file.name)
-  webbrowser.open('file://' + url, new=2) # open in a new tab, if possible
+    # Output the file
+    output_file.write(main_page_head + rendered_content)
+    output_file.close()
+
+
+def open_page(page_name):
+    # open the output file in the browser
+    url = os.path.abspath(page_name)
+    webbrowser.open('file://' + url, new=2)  # open in a new tab, if possible
