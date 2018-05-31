@@ -9,7 +9,8 @@ class Movie:
         :param movie_title: a string containing the title of the movie
         :param storyline: a string containing the storyline of the movie
         :param poster_image: a string containing the url of the poster image
-        :param trailer_youtube: a string containing the url of the youtube trailer
+        :param trailer_youtube: a string containing the url of the youtube
+        trailer
         """
         self.title = movie_title
         self.storyline = storyline
@@ -24,14 +25,17 @@ class Movie:
 
 
 class Series(Movie):
-    def __init__(self, movie_title, storyline, poster_image, trailer_youtube, number_of_seasons):
+    def __init__(self, movie_title, storyline, poster_image, trailer_youtube,
+                 number_of_seasons):
         """
         Store the arguments
         :param movie_title: a string containing the title of the movie
         :param storyline: a string containing the storyline of the movie
         :param poster_image: a string containing the url of the poster image
-        :param trailer_youtube: a string containing the url of the youtube trailer
+        :param trailer_youtube: a string containing the url of the youtube
+        trailer
         :param number_of_seasons: a string containing the number of seasons
         """
-        Movie.__init__(self, movie_title, storyline, poster_image, trailer_youtube)
+        Movie.__init__(self, movie_title, storyline, poster_image,
+                       trailer_youtube)
         self.number_of_seasons = number_of_seasons
